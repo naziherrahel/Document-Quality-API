@@ -1,0 +1,1 @@
+# Configuration for 1C API (URL, authentication)

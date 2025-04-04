@@ -1,0 +1,1 @@
+# Application setting ( model path, 1C integration)

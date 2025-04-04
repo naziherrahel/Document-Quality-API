@@ -1,0 +1,1 @@
+# logic to send data to 1C (good/bad quality images)

@@ -1,0 +1,1 @@
+# for image resizing, or normalization. we will discuss the need of those steps later 

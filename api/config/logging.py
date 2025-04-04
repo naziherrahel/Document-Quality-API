@@ -1,0 +1,1 @@
+# loging configuration for the api requests
