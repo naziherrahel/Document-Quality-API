@@ -1,13 +1,13 @@
 version: '3.13'
 
 services:
-  document_quality_api:
-    build: .
-    container_name: document-quality-api
+  document-quality-api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: document_quality_api
     ports:
       - "8000:8000"
-    volumes:
-      - .:/app
     environment:
       - ENV=production
     restart: always

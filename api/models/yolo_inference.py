@@ -1,7 +1,7 @@
 # api/models/inference.py
 import cv2
 import numpy as np
-from api.config.setting import MODEL_PATH, THRESHOLD
+from api.config.settings import MODEL_PATH, THRESHOLD
 from api.models.yolo_model import YOLOv8Classifier
 
 # Instantiate the classifier once so it can be reused across requests.

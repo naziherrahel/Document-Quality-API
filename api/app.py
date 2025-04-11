@@ -1,12 +1,8 @@
 from fastapi import FastAPI
-from api.endpoints import classify_image
+from api.endpoints import image_upload, classify_image, quality_assessment
 
-app = FastAPI(title="Document Quality Classification API", version="1.0")
+app = FastAPI(title="Document Quality API", version="1.0")
 
-# Include the classify image router under the '/api' prefix
-app.include_router(classify_image.router, prefix="/api")
-
-# Optional: Root endpoint to check API health
-@app.get("/", tags=["Root"])
-def read_root():
-    return {"message": "Welcome to the Document Quality Classification API"}
+# app.include_router(image_upload.router)
+# app.include_router(classify_image.router)
+app.include_router(quality_assessment.router)
