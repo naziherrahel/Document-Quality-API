@@ -10,12 +10,14 @@ WORKDIR /app
 
 # Install system-level dependencies (just enough for OCR/Torch/OpenCV)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
     build-essential \
     libglib2.0-0 \
     libsm6 \
     libxrender1 \
     libxext6 \
     tesseract-ocr \
+    tesseract-ocr-rus \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
