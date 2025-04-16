@@ -3,6 +3,17 @@ from api.endpoints import image_upload, classify_image, quality_assessment
 from api.models.utils import preload_yolo_model, get_yolo_model
 from contextlib import asynccontextmanager
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+
 
 app = FastAPI(title="Document Quality API", version="1.0")
 

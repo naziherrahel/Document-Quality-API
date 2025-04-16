@@ -6,24 +6,38 @@ from api.models.utils import generate_unique_filename, save_upload_file
 from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, calculate_ocr_quality
 from api.quality.scoring import calculate_global_score
 from api.schemas.quality import DocumentQualityResponse
-from api.models.yolo_inference import detect_and_crop_document  # ✅ NEW
+from api.models.yolo_inference import detect_and_crop_document 
+import numpy as np 
+import cv2
+import time
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/quality-assessment/", response_model=DocumentQualityResponse)
 async def quality_assessment(image: UploadFile = File(...)):
+    total_start_time = time.time()
     logger.info(f"Received image of type: {type(image)}")
+    
     try:
-        # Save uploaded file
-        unique_filename = generate_unique_filename(image.filename)
-        upload_path = os.path.join(str(UPLOAD_DIR), unique_filename)
-        file_path = await save_upload_file(image, upload_path)
-        logger.info(f"Saved uploaded file to: {file_path}")
+        # Measure the time it takes to save and load the file
+        start_time = time.time()
+        file_like_object = await save_upload_file(image)
+        logger.info(f"Time taken to save and load file: {time.time() - start_time:.2f} seconds")
 
-        # Detect document and crop
+        # Decode image using OpenCV
+        start_time = time.time()
+        file_like_object.seek(0)
+        img = cv2.imdecode(np.frombuffer(file_like_object.read(), np.uint8), cv2.IMREAD_COLOR)
+        logger.info(f"Time taken to decode the image: {time.time() - start_time:.2f} seconds")
+        
+        if img is None:
+            raise ValueError("Failed to load image from memory.")
+
+        # YOLO detection and cropping
+        start_time = time.time()
         try:
-            detection_result = detect_and_crop_document(file_path)
+            detection_result = detect_and_crop_document(img)
             cropped_path = detection_result["cropped_path"]
             doc_type = detection_result["doc_type"]
             confidence = detection_result["confidence"]
@@ -32,29 +46,39 @@ async def quality_assessment(image: UploadFile = File(...)):
         except Exception as e:
             logger.error("Document detection failed", exc_info=True)
             raise HTTPException(status_code=422, detail=f"Document detection failed: {str(e)}")
+        logger.info(f"Time taken for YOLO detection and cropping: {time.time() - start_time:.2f} seconds")
 
-        # Preprocess the cropped image
+        # Preprocess image
+        start_time = time.time()
         processed_path, binary_img = preprocess_image(cropped_path)
-        logger.info(f"Preprocessed image path: {processed_path}")
+        logger.info(f"Time taken for image preprocessing: {time.time() - start_time:.2f} seconds")
 
-        # Evaluate binarization quality
+        # Binarization quality
+        start_time = time.time()
         global_black_ratio, large_black_ratio = assess_binarization_quality(binary_img)
         binarization_quality = (
             f"High large-black region ratio ({large_black_ratio:.2f}%), potential quality issues."
             if large_black_ratio > 20 else
             f"Low large-black region ratio ({large_black_ratio:.2f}%), image quality acceptable."
         )
+        logger.info(f"Time taken for binarization quality assessment: {time.time() - start_time:.2f} seconds")
 
-        # OCR quality evaluation
+        # OCR quality
+        start_time = time.time()
         text, average_conf, ocr_quality = calculate_ocr_quality(processed_path, lang="rus")
+        logger.info(f"Time taken for OCR quality calculation: {time.time() - start_time:.2f} seconds")
         logger.info(f"OCR average confidence: {average_conf:.2f}")
 
-        # Calculate global score
+        # Global score
+        start_time = time.time()
         global_score, quality_category = calculate_global_score(
             ocr_conf=average_conf,
             global_black_ratio=global_black_ratio,
             large_black_ratio=large_black_ratio
         )
+        logger.info(f"Time taken for global score calculation: {time.time() - start_time:.2f} seconds")
+
+        logger.info(f"✅ Total request processing time: {time.time() - total_start_time:.2f} seconds")
 
         return DocumentQualityResponse(
             doc_type=doc_type,
