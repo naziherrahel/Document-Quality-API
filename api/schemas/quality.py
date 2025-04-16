@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 
 class DocumentQualityResponse(BaseModel):
+    doc_type: str = Field(..., description="Predicted type of the document.")
+    confidence: float = Field(..., description="Confidence of the document type prediction.")
     text: str = Field(..., description="OCR extracted text from the document.")
     average_confidence: float = Field(..., description="Average OCR confidence score.")
     ocr_quality_assessment: str = Field(..., description="Qualitative assessment of OCR readability.")

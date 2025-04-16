@@ -1,53 +1,48 @@
-# api/models/inference.py
+import os
 import cv2
-import numpy as np
-from api.config.settings import MODEL_PATH, THRESHOLD
-from api.models.yolo_model import YOLOv8Classifier
+from api.models.utils import get_yolo_model  
+from typing import Dict
 
-# Instantiate the classifier once so it can be reused across requests.
-classifier = YOLOv8Classifier(MODEL_PATH)
+def detect_and_crop_document(image_path: str, debug: bool = False) -> Dict:
+    model = get_yolo_model()  # Singleton access
 
-def classify_image(image_bytes: bytes) -> dict:
-    """
-    Classify the document image quality using YOLOv8.
+    results = model(image_path)[0]
 
-    Args:
-        image_bytes: The raw bytes of the uploaded image.
+    if not results.boxes:
+        raise ValueError("No document detected.")
 
-    Returns:
-        A dictionary with keys:
-          - quality: "good" or "bad"
-          - confidence: the model's confidence score for the top prediction.
-    """
-    # Convert the raw image bytes into a NumPy array and decode it using OpenCV.
-    nparr = np.frombuffer(image_bytes, np.uint8)
-    image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # Get the first bounding box
+    box = results.boxes[0]
+    cls_id = int(box.cls[0])
+    doc_type = model.names[cls_id]
+    confidence = float(box.conf[0])
 
-    if image is None:
-        raise ValueError("Invalid image provided.")
+    # Extract bounding box coordinates
+    x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-    # Run inference using the YOLOv8 classifier.
-    results = classifier.classify(image)
+    # Read the image and crop the region
+    img = cv2.imread(image_path)
+    if img is None:
+        raise ValueError(f"Failed to load image at: {image_path}")
 
-    # For demonstration purposes, assume the first result contains the predictions.
-    pred = results[0]  # assuming a single result
+    cropped = img[y1:y2, x1:x2]
 
-    # Extract the confidence score for the top-1 prediction using the Probs object's attribute.
-    if hasattr(pred, 'probs'):
-        # Access the top1 confidence from the probs attribute.
-        try:
-            confidence_tensor = pred.probs.top1conf
-            # If it's a torch.Tensor, convert it to a Python float.
-            if hasattr(confidence_tensor, 'cpu'):
-                confidence = confidence_tensor.cpu().item()
-            else:
-                confidence = float(confidence_tensor)
-        except Exception as e:
-            # Log error if needed and set default confidence.
-            confidence = 0.0
-    else:
-        confidence = 0.0
+    # Save the cropped image
+    cropped_path = image_path.replace(".jpg", "_cropped.jpg").replace(".png", "_cropped.png")
+    cv2.imwrite(cropped_path, cropped)
 
-    quality = "good" if confidence >= THRESHOLD else "bad"
+    if debug:
+        debug_img = img.copy()
+        cv2.rectangle(debug_img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.putText(debug_img, f"{doc_type} {confidence:.2f}", (x1, y1 - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 
-    return {"quality": quality, "confidence": confidence}
+        debug_image_path = image_path.replace(".jpg", "_debug.jpg").replace(".png", "_debug.png")
+        cv2.imwrite(debug_image_path, debug_img)
+        print(f"[DEBUG] Debug image saved to: {debug_image_path}")
+
+    return {
+        "cropped_path": cropped_path,
+        "doc_type": doc_type,
+        "confidence": confidence
+    }
