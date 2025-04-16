@@ -6,7 +6,7 @@ from api.models.utils import generate_unique_filename, save_upload_file
 from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, calculate_ocr_quality
 from api.quality.scoring import calculate_global_score
 from api.schemas.quality import DocumentQualityResponse
-from api.models.yolo_inference import detect_and_crop_document  # ✅ NEW
+from api.models.yolo_inference import detect_and_crop_document 
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
