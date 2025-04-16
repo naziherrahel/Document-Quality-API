@@ -5,12 +5,10 @@ from typing import Tuple
 from PIL import Image
 import pytesseract
 import logging
-import pytesseract
+from api.config.settings import NORMALISED_DIR
 
 # Explicitly define the path to tesseract.exe on Windows
 pytesseract.pytesseract.tesseract_cmd = r"C:/Program Files/Tesseract-OCR/tesseract.exe"
-
-from api.config.settings import NORMALISED_DIR
 
 logger = logging.getLogger(__name__)
 
