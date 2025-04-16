@@ -6,6 +6,7 @@ from ultralytics import YOLO
 from threading import Lock
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from io import BytesIO
 
 logger = logging.getLogger(__name__)
 
@@ -46,3 +47,16 @@ def get_yolo_model():
     if _model is None:
         raise RuntimeError("Model not loaded. Make sure to call preload_yolo_model() at startup.")
     return _model
+
+
+async def save_upload_file(file: UploadFile, destination: str = None) -> BytesIO:
+    # Save the uploaded file to a BytesIO object in memory
+    content = await file.read()
+    file_like_object = BytesIO(content)
+    
+    # Optionally save it to disk if required or for long-term storage
+    if destination:
+        with open(destination, "wb") as buffer:
+            buffer.write(content)
+
+    return file_like_object  # Returning in-memory object instead of a file path

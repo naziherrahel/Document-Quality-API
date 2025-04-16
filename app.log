@@ -1,0 +1,27 @@
+2025-04-16 11:37:45,850 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-16 11:37:45,856 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-16 11:37:45,874 [INFO] Time taken to decode the image: 0.01 seconds
+2025-04-16 11:37:50,832 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
+2025-04-16 11:37:50,833 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-16 11:37:50,835 [INFO] Time taken for YOLO detection and cropping: 4.95 seconds
+2025-04-16 11:37:56,553 [INFO] Time taken for image preprocessing: 5.72 seconds
+2025-04-16 11:37:56,681 [INFO] Time taken for binarization quality assessment: 0.12 seconds
+2025-04-16 11:38:00,993 [INFO] Time taken for OCR quality calculation: 4.31 seconds
+2025-04-16 11:38:00,995 [INFO] OCR average confidence: 56.65
+2025-04-16 11:38:00,996 [INFO] Time taken for global score calculation: 0.00 seconds
+2025-04-16 11:38:00,996 [INFO] ✅ Total request processing time: 15.15 seconds
+
+
+
+2025-04-16 12:06:33,116 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-16 12:06:33,124 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-16 12:06:33,183 [INFO] Time taken to decode the image: 0.06 seconds
+2025-04-16 12:06:37,623 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
+2025-04-16 12:06:37,623 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-16 12:06:37,624 [INFO] Time taken for YOLO detection and cropping: 4.44 seconds
+2025-04-16 12:06:38,920 [INFO] Time taken for image preprocessing: 1.30 seconds
+2025-04-16 12:06:38,939 [INFO] Time taken for binarization quality assessment: 0.02 seconds
+2025-04-16 12:06:40,565 [INFO] Time taken for OCR quality calculation: 1.63 seconds
+2025-04-16 12:06:40,565 [INFO] OCR average confidence: 56.65
+2025-04-16 12:06:40,565 [INFO] Time taken for global score calculation: 0.00 seconds
+2025-04-16 12:06:40,566 [INFO] ✅ Total request processing time: 7.45 seconds
