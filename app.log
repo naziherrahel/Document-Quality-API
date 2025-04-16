@@ -10,3 +10,27 @@
 2025-04-16 11:38:00,995 [INFO] OCR average confidence: 56.65
 2025-04-16 11:38:00,996 [INFO] Time taken for global score calculation: 0.00 seconds
 2025-04-16 11:38:00,996 [INFO] ✅ Total request processing time: 15.15 seconds
+2025-04-16 12:18:53,637 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-16 12:18:53,637 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-16 12:18:53,643 [INFO] Time taken to decode the image: 0.01 seconds
+2025-04-16 12:18:59,564 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
+2025-04-16 12:18:59,565 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-16 12:18:59,566 [INFO] Time taken for YOLO detection and cropping: 5.92 seconds
+2025-04-16 12:19:05,346 [INFO] Time taken for image preprocessing: 5.78 seconds
+2025-04-16 12:19:05,417 [INFO] Time taken for binarization quality assessment: 0.07 seconds
+2025-04-16 12:19:12,154 [INFO] Time taken for OCR quality calculation: 6.74 seconds
+2025-04-16 12:19:12,156 [INFO] OCR average confidence: 56.65
+2025-04-16 12:19:12,157 [INFO] Time taken for global score calculation: 0.00 seconds
+2025-04-16 12:19:12,158 [INFO] ✅ Total request processing time: 18.52 seconds
+2025-04-16 12:22:06,377 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-16 12:22:06,378 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-16 12:22:06,384 [INFO] Time taken to decode the image: 0.01 seconds
+2025-04-16 12:22:07,462 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
+2025-04-16 12:22:07,462 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-16 12:22:07,463 [INFO] Time taken for YOLO detection and cropping: 1.08 seconds
+2025-04-16 12:22:13,790 [INFO] Time taken for image preprocessing: 6.33 seconds
+2025-04-16 12:22:13,855 [INFO] Time taken for binarization quality assessment: 0.06 seconds
+2025-04-16 12:22:19,177 [INFO] Time taken for OCR quality calculation: 5.32 seconds
+2025-04-16 12:22:19,178 [INFO] OCR average confidence: 56.65
+2025-04-16 12:22:19,178 [INFO] Time taken for global score calculation: 0.00 seconds
+2025-04-16 12:22:19,180 [INFO] ✅ Total request processing time: 12.80 seconds
