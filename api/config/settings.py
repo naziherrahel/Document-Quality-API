@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 # Use environment variables for production flexibility
-TESSERACT_CMD = os.getenv("TESSERACT_CMD", r"C:/Program Files/Tesseract-OCR/tesseract.exe")
+TESSERACT_CMD = os.getenv("TESSERACT_CMD", r"C:/Users/erraheln\AppData/Local/Programs/Tesseract-OCR/tesseract.exe")
 BASE_DIR = Path(__file__).resolve().parent.parent
 # Path to the YOLOv8 classification model weights
 MODEL_PATH = os.getenv("MODEL_PATH", "model/weights/yolov8m.pt")

@@ -1,3 +1,5 @@
+# api/quality/ocr_quality.py
+
 import cv2
 import numpy as np
 import os
@@ -5,109 +7,117 @@ from typing import Tuple
 from PIL import Image
 import pytesseract
 import logging
-from api.config.settings import NORMALISED_DIR
 
-from api.config.settings import TESSERACT_CMD  # assuming config.py holds this
+from api.config.settings import NORMALISED_DIR, TESSERACT_CMD
 
-# Set path to Tesseract binary
 pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
-
-
 logger = logging.getLogger(__name__)
 
 def preprocess_image(img_path: str) -> Tuple[str, np.ndarray]:
     """
-    Preprocess the image by converting it to grayscale, resizing,
-    denoising, applying morphological operations, and then
-    binarizing via Gaussian blur and Otsu thresholding.
-    
+    Preprocess the image using GPU-accelerated OpenCV (if built with CUDA).
+
     Returns:
-        A tuple containing:
-        - The file path to the processed binary image.
-        - The binary image (as a numpy array).
+        - Path to saved binary image
+        - Binary image (np.ndarray)
     """
     img = cv2.imread(img_path)
     if img is None:
-        raise ValueError("Unable to read image. Please check the file format and path.")
+        raise ValueError("Failed to read image.")
+
     file_name = os.path.splitext(os.path.basename(img_path))[0]
-    
+
     # Convert to grayscale
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # Resize (enlarge) to enhance text clarity
-    img_gray = cv2.resize(img_gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-    # Denoise the image
-    img_gray = cv2.fastNlMeansDenoising(img_gray, None, 10, 7, 21)
-    # Morphological operations: dilation followed by erosion
-    kernel = np.ones((1, 1), np.uint8)
-    img_gray = cv2.dilate(img_gray, kernel, iterations=1)
-    img_gray = cv2.erode(img_gray, kernel, iterations=1)
-    # Apply Gaussian Blur then perform Otsu thresholding
-    img_blur = cv2.GaussianBlur(img_gray, (3, 3), 0)
-    _, binary_img = cv2.threshold(img_blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    
-    # Save processed image to NORMALISED_DIR
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Resize
+    gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
+    # Upload to GPU if available
+    try:
+        gpu_mat = cv2.cuda_GpuMat()
+        gpu_mat.upload(gray)
+
+        # Denoising using Gaussian blur (CUDA)
+        gpu_blur = cv2.cuda.createGaussianFilter(cv2.CV_8UC1, -1, (3, 3), 0)
+        gpu_blurred = gpu_blur.apply(gpu_mat)
+
+        # Thresholding using adaptive threshold (falling back to CPU if needed)
+        blurred = gpu_blurred.download()
+    except Exception as e:
+        logger.warning("CUDA not available, falling back to CPU preprocessing.")
+        blurred = cv2.GaussianBlur(gray, (3, 3), 0)
+
+    # Thresholding
+    _, binary_img = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Save processed image
     save_path = os.path.join(str(NORMALISED_DIR), f"{file_name}_processed.jpg")
     cv2.imwrite(save_path, binary_img)
+
     return save_path, binary_img
+
 
 def assess_binarization_quality(binary_img: np.ndarray) -> Tuple[float, float]:
     """
-    Assess binarization quality by computing:
-      - Global black ratio (percentage of black pixels)
-      - Large black region ratio (percentage of area of large connected components)
-    
+    Evaluate black pixel distribution and large black regions.
+
     Returns:
-        A tuple of (global_black_ratio, large_black_ratio).
+        - Global black pixel ratio
+        - Large black region ratio
     """
     total_pixels = binary_img.size
     black_pixels = total_pixels - cv2.countNonZero(binary_img)
     global_black_ratio = (black_pixels / total_pixels) * 100
-    
-    # Invert image for connected components analysis.
+
     inverted = cv2.bitwise_not(binary_img)
-    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(inverted, connectivity=8)
-    
+    num_labels, _, stats, _ = cv2.connectedComponentsWithStats(inverted, connectivity=8)
+
     area_threshold = total_pixels * 0.01
-    large_component_area = sum(
-        stats[i, cv2.CC_STAT_AREA] for i in range(1, num_labels)
+    large_area = sum(
+        stats[i, cv2.CC_STAT_AREA]
+        for i in range(1, num_labels)
         if stats[i, cv2.CC_STAT_AREA] > area_threshold
     )
-    large_black_ratio = (large_component_area / total_pixels) * 100
+    large_black_ratio = (large_area / total_pixels) * 100
+
     return global_black_ratio, large_black_ratio
+
 
 def calculate_ocr_quality(image_path: str, lang: str = "rus") -> Tuple[str, float, str]:
     """
-    Perform OCR using Tesseract and return the extracted text, 
-    average confidence, and a qualitative readability assessment.
-    
+    Perform OCR using Tesseract, returning text, confidence, and label.
+
     Returns:
-        A tuple of (text, average_confidence, quality assessment).
+        - Text
+        - Average confidence
+        - Quality label
     """
     try:
         img = Image.open(image_path)
     except Exception as e:
-        logger.error("Error opening image for OCR", exc_info=True)
+        logger.error("Failed to open image for OCR", exc_info=True)
         raise e
 
-    # Extract OCR data including per-word confidence
     data = pytesseract.image_to_data(img, lang=lang, output_type=pytesseract.Output.DICT)
+
     conf_list = []
     for conf in data.get("conf", []):
         try:
-            conf_val = int(conf)
-            if conf_val > 0:
-                conf_list.append(conf_val)
+            c = int(conf)
+            if c > 0:
+                conf_list.append(c)
         except ValueError:
             continue
 
     average_conf = sum(conf_list) / len(conf_list) if conf_list else 0.0
     text = pytesseract.image_to_string(img, lang=lang)
-    
+
     if average_conf >= 80:
         quality = "Excellent readability"
     elif average_conf >= 60:
         quality = "Moderate readability"
     else:
         quality = "Poor readability"
-    
+
     return text, average_conf, quality
