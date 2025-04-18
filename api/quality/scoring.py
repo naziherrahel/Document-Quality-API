@@ -16,7 +16,7 @@ def calculate_global_score(ocr_conf: float, global_black_ratio: float, large_bla
     """
     score = alpha * ocr_conf - beta * global_black_ratio - gamma * large_black_ratio
 
-    if score >= 80:
+    if score >= 64:
         quality_category = "Excellent"
     elif score >= 50:
         quality_category = "Moderate"

@@ -10,7 +10,7 @@ def detect_and_crop_document(image: np.ndarray, debug: bool = False) -> Dict:
     model = get_yolo_model()  # Singleton access
 
     # YOLO expects an image array, so use it directly for detection
-    results = model(image)[0]
+    results = model(image, imgsz= 640)[0]
 
     if not results.boxes:
         raise ValueError("No document detected.")

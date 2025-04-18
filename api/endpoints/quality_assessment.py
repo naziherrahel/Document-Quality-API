@@ -78,7 +78,7 @@ async def quality_assessment(image: UploadFile = File(...)):
         )
         logger.info(f"Time taken for global score calculation: {time.time() - start_time:.2f} seconds")
 
-        logger.info(f"✅ Total request processing time: {time.time() - total_start_time:.2f} seconds")
+        logger.info(f"Total request processing time: {time.time() - total_start_time:.2f} seconds")
 
         return DocumentQualityResponse(
             doc_type=doc_type,

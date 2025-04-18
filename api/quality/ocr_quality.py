@@ -7,8 +7,11 @@ import pytesseract
 import logging
 from api.config.settings import NORMALISED_DIR
 
-# Explicitly define the path to tesseract.exe on Windows
-pytesseract.pytesseract.tesseract_cmd = r"C:/Program Files/Tesseract-OCR/tesseract.exe"
+from api.config.settings import TESSERACT_CMD  # assuming config.py holds this
+
+# Set path to Tesseract binary
+pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
+
 
 logger = logging.getLogger(__name__)
 

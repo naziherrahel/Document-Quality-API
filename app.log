@@ -1,36 +1,87 @@
-2025-04-16 11:37:45,850 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
-2025-04-16 11:37:45,856 [INFO] Time taken to save and load file: 0.00 seconds
-2025-04-16 11:37:45,874 [INFO] Time taken to decode the image: 0.01 seconds
-2025-04-16 11:37:50,832 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
-2025-04-16 11:37:50,833 [INFO] Cropped image saved to: cropped_image.jpg
-2025-04-16 11:37:50,835 [INFO] Time taken for YOLO detection and cropping: 4.95 seconds
-2025-04-16 11:37:56,553 [INFO] Time taken for image preprocessing: 5.72 seconds
-2025-04-16 11:37:56,681 [INFO] Time taken for binarization quality assessment: 0.12 seconds
-2025-04-16 11:38:00,993 [INFO] Time taken for OCR quality calculation: 4.31 seconds
-2025-04-16 11:38:00,995 [INFO] OCR average confidence: 56.65
-2025-04-16 11:38:00,996 [INFO] Time taken for global score calculation: 0.00 seconds
-2025-04-16 11:38:00,996 [INFO] вњ… Total request processing time: 15.15 seconds
-2025-04-16 12:18:53,637 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
-2025-04-16 12:18:53,637 [INFO] Time taken to save and load file: 0.00 seconds
-2025-04-16 12:18:53,643 [INFO] Time taken to decode the image: 0.01 seconds
-2025-04-16 12:18:59,564 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
-2025-04-16 12:18:59,565 [INFO] Cropped image saved to: cropped_image.jpg
-2025-04-16 12:18:59,566 [INFO] Time taken for YOLO detection and cropping: 5.92 seconds
-2025-04-16 12:19:05,346 [INFO] Time taken for image preprocessing: 5.78 seconds
-2025-04-16 12:19:05,417 [INFO] Time taken for binarization quality assessment: 0.07 seconds
-2025-04-16 12:19:12,154 [INFO] Time taken for OCR quality calculation: 6.74 seconds
-2025-04-16 12:19:12,156 [INFO] OCR average confidence: 56.65
-2025-04-16 12:19:12,157 [INFO] Time taken for global score calculation: 0.00 seconds
-2025-04-16 12:19:12,158 [INFO] вњ… Total request processing time: 18.52 seconds
-2025-04-16 12:22:06,377 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
-2025-04-16 12:22:06,378 [INFO] Time taken to save and load file: 0.00 seconds
-2025-04-16 12:22:06,384 [INFO] Time taken to decode the image: 0.01 seconds
-2025-04-16 12:22:07,462 [INFO] YOLO detected doc_type=inn with confidence=0.9943761825561523
-2025-04-16 12:22:07,462 [INFO] Cropped image saved to: cropped_image.jpg
-2025-04-16 12:22:07,463 [INFO] Time taken for YOLO detection and cropping: 1.08 seconds
-2025-04-16 12:22:13,790 [INFO] Time taken for image preprocessing: 6.33 seconds
-2025-04-16 12:22:13,855 [INFO] Time taken for binarization quality assessment: 0.06 seconds
-2025-04-16 12:22:19,177 [INFO] Time taken for OCR quality calculation: 5.32 seconds
-2025-04-16 12:22:19,178 [INFO] OCR average confidence: 56.65
-2025-04-16 12:22:19,178 [INFO] Time taken for global score calculation: 0.00 seconds
-2025-04-16 12:22:19,180 [INFO] вњ… Total request processing time: 12.80 seconds
+2025-04-18 09:18:56,228 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-18 09:18:56,228 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-18 09:18:56,261 [INFO] Time taken to decode the image: 0.03 seconds
+2025-04-18 09:18:57,829 [INFO] YOLO detected doc_type=snils with confidence=0.7091588973999023
+2025-04-18 09:18:57,829 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-18 09:18:57,829 [INFO] Time taken for YOLO detection and cropping: 1.57 seconds
+2025-04-18 09:19:02,231 [INFO] Time taken for image preprocessing: 4.40 seconds
+2025-04-18 09:19:02,259 [INFO] Time taken for binarization quality assessment: 0.03 seconds
+2025-04-18 09:19:02,303 [ERROR] Unhandled error in quality assessment
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytesseract\pytesseract.py", line 451, in get_tesseract_version
+    output = subprocess.check_output(
+        [tesseract_cmd, '--version'],
+    ...<2 lines>...
+        stdin=subprocess.DEVNULL,
+    )
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 474, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 556, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 1038, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        pass_fds, cwd, env,
+                        ^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+                        gid, gids, uid, umask,
+                        ^^^^^^^^^^^^^^^^^^^^^^
+                        start_new_session, process_group)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\subprocess.py", line 1550, in _execute_child
+    hp, ht, pid, tid = _winapi.CreateProcess(executable, args,
+                       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                             # no special security
+                             ^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+                             cwd,
+                             ^^^^
+                             startupinfo)
+                             ^^^^^^^^^^^^
+FileNotFoundError: [WinError 2] Не удается найти указанный файл
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\Desktop\IQA_API\api\endpoints\quality_assessment.py", line 68, in quality_assessment
+    text, average_conf, ocr_quality = calculate_ocr_quality(processed_path, lang="rus")
+                                      ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\Desktop\IQA_API\api\quality\ocr_quality.py", line 90, in calculate_ocr_quality
+    data = pytesseract.image_to_data(img, lang=lang, output_type=pytesseract.Output.DICT)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytesseract\pytesseract.py", line 590, in image_to_data
+    if get_tesseract_version(cached=True) < TESSERACT_MIN_VERSION:
+       ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytesseract\pytesseract.py", line 163, in wrapper
+    wrapper._result = func(*args, **kwargs)
+                      ~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\site-packages\pytesseract\pytesseract.py", line 458, in get_tesseract_version
+    raise TesseractNotFoundError()
+pytesseract.pytesseract.TesseractNotFoundError: tesseract is not installed or it's not in your PATH. See README file for more information.
+2025-04-18 09:23:52,129 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-18 09:23:52,129 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-18 09:23:52,151 [INFO] Time taken to decode the image: 0.02 seconds
+2025-04-18 09:23:53,054 [INFO] YOLO detected doc_type=snils with confidence=0.7091588973999023
+2025-04-18 09:23:53,054 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-18 09:23:53,054 [INFO] Time taken for YOLO detection and cropping: 0.90 seconds
+2025-04-18 09:23:57,435 [INFO] Time taken for image preprocessing: 4.38 seconds
+2025-04-18 09:23:57,461 [INFO] Time taken for binarization quality assessment: 0.03 seconds
+2025-04-18 09:23:58,666 [INFO] Time taken for OCR quality calculation: 1.21 seconds
+2025-04-18 09:23:58,667 [INFO] OCR average confidence: 45.43
+2025-04-18 09:23:58,667 [INFO] Time taken for global score calculation: 0.00 seconds
+2025-04-18 09:23:58,667 [INFO] Total request processing time: 6.54 seconds
+2025-04-18 09:33:40,424 [INFO] Received image of type: <class 'starlette.datastructures.UploadFile'>
+2025-04-18 09:33:40,425 [INFO] Time taken to save and load file: 0.00 seconds
+2025-04-18 09:33:40,444 [INFO] Time taken to decode the image: 0.02 seconds
+2025-04-18 09:33:41,357 [INFO] YOLO detected doc_type=snils with confidence=0.7091588973999023
+2025-04-18 09:33:41,357 [INFO] Cropped image saved to: cropped_image.jpg
+2025-04-18 09:33:41,357 [INFO] Time taken for YOLO detection and cropping: 0.91 seconds
+2025-04-18 09:33:45,791 [INFO] Time taken for image preprocessing: 4.43 seconds
+2025-04-18 09:33:45,818 [INFO] Time taken for binarization quality assessment: 0.03 seconds
+2025-04-18 09:33:46,428 [INFO] Time taken for OCR quality calculation: 0.61 seconds
+2025-04-18 09:33:46,429 [INFO] OCR average confidence: 45.43
+2025-04-18 09:33:46,429 [INFO] Time taken for global score calculation: 0.00 seconds
+2025-04-18 09:33:46,429 [INFO] Total request processing time: 6.01 seconds
