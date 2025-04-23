@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from api.config.settings import UPLOAD_DIR
 from api.models.utils import generate_unique_filename, save_upload_file
-from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, calculate_ocr_quality
+from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, async_calculate_ocr_quality
 from api.quality.scoring import calculate_global_score
 from api.schemas.quality import DocumentQualityResponse
 from api.models.yolo_inference import detect_and_crop_document 
@@ -63,10 +63,15 @@ async def quality_assessment(image: UploadFile = File(...)):
         )
         logger.info(f"Time taken for binarization quality assessment: {time.time() - start_time:.2f} seconds")
 
-        # OCR quality
+        # OCR quality (using PaddleOCR)
         start_time = time.time()
-        text, average_conf, ocr_quality = calculate_ocr_quality(processed_path, lang="rus")
-        logger.info(f"Time taken for OCR quality calculation: {time.time() - start_time:.2f} seconds")
+        try:
+            # Here, we are calling async_calculate_ocr_quality, which is non-blocking
+            text, average_conf, ocr_quality = await async_calculate_ocr_quality(processed_path, lang="ru")
+        except Exception as e:
+            logger.error("OCR processing failed", exc_info=True)
+            raise HTTPException(status_code=500, detail="OCR processing failed.")
+        logger.info(f"Time taken for OCR quality calculation (PaddleOCR): {time.time() - start_time:.2f} seconds")
         logger.info(f"OCR average confidence: {average_conf:.2f}")
 
         # Global score

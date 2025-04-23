@@ -3,15 +3,17 @@
 import cv2
 import numpy as np
 import os
-from typing import Tuple
-from PIL import Image
-import pytesseract
 import logging
+from typing import Tuple
+from paddleocr import PaddleOCR
+import asyncio
 
-from api.config.settings import NORMALISED_DIR, TESSERACT_CMD
+from api.config.settings import NORMALISED_DIR
 
-pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
 logger = logging.getLogger(__name__)
+
+# Initialize PaddleOCR once with GPU enabled and Russian language
+ocr = PaddleOCR(use_angle_cls=True, lang='ru', use_gpu=True)
 
 def preprocess_image(img_path: str) -> Tuple[str, np.ndarray]:
     """
@@ -57,7 +59,6 @@ def preprocess_image(img_path: str) -> Tuple[str, np.ndarray]:
 
     return save_path, binary_img
 
-
 def assess_binarization_quality(binary_img: np.ndarray) -> Tuple[float, float]:
     """
     Evaluate black pixel distribution and large black regions.
@@ -83,35 +84,31 @@ def assess_binarization_quality(binary_img: np.ndarray) -> Tuple[float, float]:
 
     return global_black_ratio, large_black_ratio
 
-
-def calculate_ocr_quality(image_path: str, lang: str = "rus") -> Tuple[str, float, str]:
+def calculate_ocr_quality(image_path: str, lang: str = "ru") -> Tuple[str, float, str]:
     """
-    Perform OCR using Tesseract, returning text, confidence, and label.
+    Perform OCR using PaddleOCR with GPU support.
 
     Returns:
-        - Text
+        - Extracted text
         - Average confidence
         - Quality label
     """
     try:
-        img = Image.open(image_path)
+        result = ocr.ocr(image_path, cls=True)
     except Exception as e:
-        logger.error("Failed to open image for OCR", exc_info=True)
+        logger.error("PaddleOCR failed on image", exc_info=True)
         raise e
 
-    data = pytesseract.image_to_data(img, lang=lang, output_type=pytesseract.Output.DICT)
+    text_lines = []
+    confidences = []
 
-    conf_list = []
-    for conf in data.get("conf", []):
-        try:
-            c = int(conf)
-            if c > 0:
-                conf_list.append(c)
-        except ValueError:
-            continue
+    for line in result:
+        for box, (text, conf) in line:
+            text_lines.append(text)
+            confidences.append(conf)
 
-    average_conf = sum(conf_list) / len(conf_list) if conf_list else 0.0
-    text = pytesseract.image_to_string(img, lang=lang)
+    text = "\n".join(text_lines)
+    average_conf = np.mean(confidences) * 100 if confidences else 0.0
 
     if average_conf >= 80:
         quality = "Excellent readability"
@@ -121,3 +118,9 @@ def calculate_ocr_quality(image_path: str, lang: str = "rus") -> Tuple[str, floa
         quality = "Poor readability"
 
     return text, average_conf, quality
+
+async def async_calculate_ocr_quality(image_path: str, lang: str = "ru") -> Tuple[str, float, str]:
+    """
+    Asynchronous wrapper for OCR using asyncio to avoid blocking FastAPI.
+    """
+    return await asyncio.to_thread(calculate_ocr_quality, image_path, lang)
