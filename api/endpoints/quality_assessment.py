@@ -1,8 +1,6 @@
-import os
 import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException
-from api.config.settings import UPLOAD_DIR
-from api.models.utils import generate_unique_filename, save_upload_file
+from api.models.utils import  save_upload_file
 from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, async_calculate_ocr_quality
 from api.quality.scoring import calculate_global_score
 from api.schemas.quality import DocumentQualityResponse
