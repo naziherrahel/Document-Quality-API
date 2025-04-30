@@ -1,0 +1,18 @@
+TO DO: 
+
+1.  I need to make sure that in api.quality.ocr_quality that preprocess_image()  function 
+    is not processing the image from the calling it from the disk, if yes then i should 
+    make sure if its possibale to precess the image coming from the memory since in the previouse 
+    stage yolo already prcess it in the memory and we must have the access to the image in the memor.
+
+2.  I also need to make sure im not saving the preprocessed img to the disk in case i dont need it 
+    in the production!!
+
+3.  the same thing we have done in point number 1, we must check it for calculate_ocr_quality and sync_calculate_ocr_quality
+
+
+4.  I need to think about the global scoring logic, maybe we can change the value of the alfa beta and gamma. 
+
+5.  I need to think how to use the api.templates.error_template.json
+
+6.  I need to make sure i freez the dependencies to the req file 

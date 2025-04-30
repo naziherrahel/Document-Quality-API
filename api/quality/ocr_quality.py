@@ -7,7 +7,6 @@ import logging
 from typing import Tuple
 from paddleocr import PaddleOCR
 import asyncio
-
 from api.config.settings import NORMALISED_DIR
 
 logger = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ def preprocess_image(img_path: str) -> Tuple[str, np.ndarray]:
         # Thresholding using adaptive threshold (falling back to CPU if needed)
         blurred = gpu_blurred.download()
     except Exception as e:
-        logger.warning("CUDA not available, falling back to CPU preprocessing.")
+        logger.warning("CUDA not available for opencv im_prepro, falling back to CPU preprocessing.")
         blurred = cv2.GaussianBlur(gray, (3, 3), 0)
 
     # Thresholding

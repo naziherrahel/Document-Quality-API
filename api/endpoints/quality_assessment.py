@@ -14,26 +14,19 @@ router = APIRouter()
 
 @router.post("/quality-assessment/", response_model=DocumentQualityResponse)
 async def quality_assessment(image: UploadFile = File(...)):
-    total_start_time = time.time()
     logger.info(f"Received image of type: {type(image)}")
     
     try:
-        # Measure the time it takes to save and load the file
-        start_time = time.time()
         file_like_object = await save_upload_file(image)
-        logger.info(f"Time taken to save and load file: {time.time() - start_time:.2f} seconds")
 
         # Decode image using OpenCV
-        start_time = time.time()
         file_like_object.seek(0)
         img = cv2.imdecode(np.frombuffer(file_like_object.read(), np.uint8), cv2.IMREAD_COLOR)
-        logger.info(f"Time taken to decode the image: {time.time() - start_time:.2f} seconds")
         
         if img is None:
             raise ValueError("Failed to load image from memory.")
 
         # YOLO detection and cropping
-        start_time = time.time()
         try:
             detection_result = detect_and_crop_document(img)
             cropped_path = detection_result["cropped_path"]
@@ -44,44 +37,34 @@ async def quality_assessment(image: UploadFile = File(...)):
         except Exception as e:
             logger.error("Document detection failed", exc_info=True)
             raise HTTPException(status_code=422, detail=f"Document detection failed: {str(e)}")
-        logger.info(f"Time taken for YOLO detection and cropping: {time.time() - start_time:.2f} seconds")
 
         # Preprocess image
-        start_time = time.time()
         processed_path, binary_img = preprocess_image(cropped_path)
-        logger.info(f"Time taken for image preprocessing: {time.time() - start_time:.2f} seconds")
 
         # Binarization quality
-        start_time = time.time()
         global_black_ratio, large_black_ratio = assess_binarization_quality(binary_img)
         binarization_quality = (
             f"High large-black region ratio ({large_black_ratio:.2f}%), potential quality issues."
             if large_black_ratio > 20 else
             f"Low large-black region ratio ({large_black_ratio:.2f}%), image quality acceptable."
         )
-        logger.info(f"Time taken for binarization quality assessment: {time.time() - start_time:.2f} seconds")
 
         # OCR quality (using PaddleOCR)
-        start_time = time.time()
         try:
             # Here, we are calling async_calculate_ocr_quality, which is non-blocking
             text, average_conf, ocr_quality = await async_calculate_ocr_quality(processed_path, lang="ru")
         except Exception as e:
             logger.error("OCR processing failed", exc_info=True)
             raise HTTPException(status_code=500, detail="OCR processing failed.")
-        logger.info(f"Time taken for OCR quality calculation (PaddleOCR): {time.time() - start_time:.2f} seconds")
         logger.info(f"OCR average confidence: {average_conf:.2f}")
 
         # Global score
-        start_time = time.time()
         global_score, quality_category = calculate_global_score(
             ocr_conf=average_conf,
             global_black_ratio=global_black_ratio,
             large_black_ratio=large_black_ratio
         )
-        logger.info(f"Time taken for global score calculation: {time.time() - start_time:.2f} seconds")
 
-        logger.info(f"Total request processing time: {time.time() - total_start_time:.2f} seconds")
 
         return DocumentQualityResponse(
             doc_type=doc_type,
