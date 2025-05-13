@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torchvision.ops as ops
 from ultralytics import YOLO
-from yolo_inference import preprocess_image
+from api.models.preprocess import preprocess_image
 
 # DEVICE & MODEL LOADING
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -80,6 +80,8 @@ def detect_and_crop_document(image: np.ndarray, debug: bool = False) -> dict:
 
     return {
         "doc_type": doc_type,
+        "cropped_asnumpy" : cropped,
         "confidence": conf,
         "cropped_path": save_path
+
     }

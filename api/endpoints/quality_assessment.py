@@ -1,13 +1,13 @@
 import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from api.models.utils import  save_upload_file
-from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, async_calculate_ocr_quality
+from api.quality.ocr_quality import preprocess_image, assess_binarization_quality, safe_ocr_call
 from api.quality.scoring import calculate_global_score
 from api.schemas.quality import DocumentQualityResponse
 from api.models.yolo_inference import detect_and_crop_document 
 import numpy as np 
 import cv2
-import time
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -15,20 +15,22 @@ router = APIRouter()
 @router.post("/quality-assessment/", response_model=DocumentQualityResponse)
 async def quality_assessment(image: UploadFile = File(...)):
     logger.info(f"Received image of type: {type(image)}")
-    
+
     try:
         file_like_object = await save_upload_file(image)
 
         # Decode image using OpenCV
         file_like_object.seek(0)
         img = cv2.imdecode(np.frombuffer(file_like_object.read(), np.uint8), cv2.IMREAD_COLOR)
-        
         if img is None:
             raise ValueError("Failed to load image from memory.")
+
+        logger.info("Image successfully loaded and decoded.")
 
         # YOLO detection and cropping
         try:
             detection_result = detect_and_crop_document(img)
+            cropped = detection_result["cropped_asnumpy"]
             cropped_path = detection_result["cropped_path"]
             doc_type = detection_result["doc_type"]
             confidence = detection_result["confidence"]
@@ -39,7 +41,8 @@ async def quality_assessment(image: UploadFile = File(...)):
             raise HTTPException(status_code=422, detail=f"Document detection failed: {str(e)}")
 
         # Preprocess image
-        processed_path, binary_img = preprocess_image(cropped_path)
+        processed_path, binary_img = preprocess_image(cropped)
+        logger.info("Image successfully preprocessed.")
 
         # Binarization quality
         global_black_ratio, large_black_ratio = assess_binarization_quality(binary_img)
@@ -51,12 +54,11 @@ async def quality_assessment(image: UploadFile = File(...)):
 
         # OCR quality (using PaddleOCR)
         try:
-            # Here, we are calling async_calculate_ocr_quality, which is non-blocking
-            text, average_conf, ocr_quality = await async_calculate_ocr_quality(processed_path, lang="ru")
+            text, average_conf, ocr_quality = await safe_ocr_call(processed_path, lang="ru")
+            logger.info(f"OCR processing complete, average confidence: {average_conf:.2f}")
         except Exception as e:
             logger.error("OCR processing failed", exc_info=True)
             raise HTTPException(status_code=500, detail="OCR processing failed.")
-        logger.info(f"OCR average confidence: {average_conf:.2f}")
 
         # Global score
         global_score, quality_category = calculate_global_score(
@@ -65,6 +67,7 @@ async def quality_assessment(image: UploadFile = File(...)):
             large_black_ratio=large_black_ratio
         )
 
+        logger.info(f"Global score calculated: {global_score}")
 
         return DocumentQualityResponse(
             doc_type=doc_type,
