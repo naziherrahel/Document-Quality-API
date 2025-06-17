@@ -1,13 +1,20 @@
-version: '3.13'
-
 services:
-  document-quality-api:
+  doc_api:
+    image: fastapi-gpu:latest
     build:
-      context: .
+      context: ..  # Points to Document-Quality-API/
       dockerfile: docker/Dockerfile
-    container_name: document_quality_api
+      args:
+        PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
+        PIP_RETRIES: "5"
     ports:
       - "8000:8000"
+    deploy:
+      restart_policy:
+        condition: unless-stopped
+    volumes:
+      - C:/Users/erraheln/Desktop/iqa/storage:/app/storage
+    runtime: nvidia
     environment:
-      - ENV=production
-    restart: always
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility

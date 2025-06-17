@@ -1,5 +1,0 @@
-opencv_python==4.11.0.86
-opencv_python_headless==4.11.0.86
-pytesseract==0.3.13
-ultralytics==8.3.101
-fastapi==0.115.12

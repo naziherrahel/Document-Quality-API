@@ -1,1 +1,1 @@
-# logic for storing/retreiving datasets
+# logic for retreiving datasets

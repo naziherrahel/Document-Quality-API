@@ -15,3 +15,7 @@ class APIUser(HttpUser):
             print(f"Response Status Code: {response.status_code}")
             print(f"Response Body: {response.text}")
             assert response.status_code == 200
+
+
+# tesr cm : 
+# locust -f locust_test.py --host=http://localhost:8000

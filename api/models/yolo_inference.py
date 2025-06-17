@@ -1,6 +1,5 @@
 import os
 from uuid import uuid4
-
 import cv2
 import numpy as np
 import torch
@@ -11,8 +10,8 @@ from ultralytics import YOLO
 # 1) DEVICE & MODEL LOADING
 # ——————————————————————————————————————————————————————————————
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = YOLO("./model/weights/yolov8.pt").to(device)
-model.fuse()  # (optional) for faster inference if supported
+model = YOLO("./model/weights/best1.pt").to(device)
+model.fuse()  # (optional) for faster inference
 
 # ——————————————————————————————————————————————————————————————
 # 2) PATCH torchvision.ops.nms FOR CUDA → CPU FALLBACK
@@ -57,55 +56,62 @@ def preprocess_image(image: np.ndarray, target_size: int = 640):
 SAVE_DIR = "api/static/cropped_docs"
 os.makedirs(SAVE_DIR, exist_ok=True)
 
-def detect_and_crop_document(image: np.ndarray, debug: bool = False) -> dict:
+def detect_and_crop_document(image: np.ndarray, debug: bool = False, conf_threshold: float = 0.5) -> list:
     """
-    Run YOLO inference, correct bounding box, crop, save, and return metadata.
+    Run YOLO inference, correct bounding boxes, crop, save, and return metadata for all detected documents.
     """
     tensor_image, scale, pad_left, pad_top = preprocess_image(image)
     if debug:
         print(f"[DEBUG] Input tensor shape: {tensor_image.shape}, device: {tensor_image.device}")
 
-    # 2) Inference
+    # Inference
     results = model(tensor_image)[0]
 
-    # 3) No detections?
+    # No detections?
     if results.boxes is None or len(results.boxes) == 0:
-        raise ValueError("No document detected.")
+        return []
 
-    # 4) Highest-confidence box
-    best = results.boxes[0]
-    x1, y1, x2, y2 = best.xyxy[0].cpu().numpy()
-    conf = float(best.conf[0].cpu().item())
-    cls_id = int(best.cls[0].cpu().item())
-    doc_type = model.names.get(cls_id, str(cls_id))
+    # Process all detections above confidence threshold
+    detections = []
+    for box in results.boxes:
+        conf = float(box.conf[0].cpu().item())
+        if conf < conf_threshold:
+            continue  # Skip low-confidence detections
+        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+        cls_id = int(box.cls[0].cpu().item())
+        doc_type = model.names.get(cls_id, str(cls_id))
 
-    # 5) Adjust box coordinates back to original image space
-    x1 = (x1 - pad_left) / scale
-    y1 = (y1 - pad_top) / scale
-    x2 = (x2 - pad_left) / scale
-    y2 = (y2 - pad_top) / scale
+        # Adjust box coordinates back to original image space
+        x1 = (x1 - pad_left) / scale
+        y1 = (y1 - pad_top) / scale
+        x2 = (x2 - pad_left) / scale
+        y2 = (y2 - pad_top) / scale
 
-    h, w = image.shape[:2]
-    x1, y1 = max(0, int(round(x1))), max(0, int(round(y1)))
-    x2, y2 = min(w, int(round(x2))), min(h, int(round(y2)))
+        h, w = image.shape[:2]
+        x1, y1 = max(0, int(round(x1))), max(0, int(round(y1)))
+        x2, y2 = min(w, int(round(x2))), min(h, int(round(y2)))
 
-    if debug:
-        print(f"[DEBUG] Detected '{doc_type}' with confidence {conf:.2f}")
-        print(f"[DEBUG] Box on original image: ({x1}, {y1}), ({x2}, {y2})")
+        if debug:
+            print(f"[DEBUG] Detected '{doc_type}' with confidence {conf:.2f}")
+            print(f"[DEBUG] Box on original image: ({x1}, {y1}), ({x2}, {y2})")
 
-    # 6) Crop original image
-    cropped = image[y1:y2, x1:x2]
+        # Crop original image
+        cropped = image[y1:y2, x1:x2]
+        if cropped.size == 0:  # Skip empty crops
+            continue
 
-    # 7) Save crop
-    filename = f"{uuid4().hex}.jpg"
-    save_path = os.path.join(SAVE_DIR, filename)
-    cv2.imwrite(save_path, cropped)
+        # Save crop
+        filename = f"{uuid4().hex}.jpg"
+        save_path = os.path.join(SAVE_DIR, filename)
+        cv2.imwrite(save_path, cropped)
 
-    if debug:
-        print(f"[DEBUG] Cropped image saved at: {save_path}")
+        if debug:
+            print(f"[DEBUG] Cropped image saved at: {save_path}")
 
-    return {
-        "doc_type": doc_type,
-        "confidence": conf,
-        "cropped_path": save_path
-    }
+        detections.append({
+            "doc_type": doc_type,
+            "confidence": conf,
+            "cropped_path": save_path
+        })
+
+    return detections

@@ -25,7 +25,7 @@ async def save_upload_file(file: UploadFile, destination: str) -> str:
 _model = None
 _lock = Lock()
 base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-model_path = os.path.join(base_dir, "model", "weights", "yolov8.pt")
+model_path = os.path.join(base_dir, "model", "weights", "best1.pt")
 
 # Lifespan event handler for FastAPI
 @asynccontextmanager
@@ -36,11 +36,10 @@ async def preload_yolo_model(app: FastAPI):
             if not os.path.exists(model_path):
                 raise FileNotFoundError(f"Model file not found at: {model_path}")
             print("Loading YOLO model...")
-            _model = YOLO(model_path)  # Load YOLO model here
+            _model = YOLO(model_path)  
     try:
         yield
     finally:
-        # Cleanup if necessary (for example, unloading the model or other resources)
         pass
 
 def get_yolo_model():

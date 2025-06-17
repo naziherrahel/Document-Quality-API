@@ -26,7 +26,5 @@ async def read_root():
     model = get_yolo_model()
     return {"message": "Model loaded successfully!"}
 
-# Include your routers here
-# app.include_router(image_upload.router)
-# app.include_router(classify_image.router)
+
 app.include_router(quality_assessment.router)
