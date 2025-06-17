@@ -1,12 +1,30 @@
 from fastapi import FastAPI
-from api.endpoints import classify_image
+from api.endpoints import quality_assessment
+from api.models.utils import preload_yolo_model, get_yolo_model
 
-app = FastAPI(title="Document Quality Classification API", version="1.0")
+import logging
 
-# Include the classify image router under the '/api' prefix
-app.include_router(classify_image.router, prefix="/api")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
 
-# Optional: Root endpoint to check API health
-@app.get("/", tags=["Root"])
-def read_root():
-    return {"message": "Welcome to the Document Quality Classification API"}
+# Initialize FastAPI with a lifespan context for YOLO model
+app = FastAPI(
+    title="Document Quality API", 
+    version="1.0", 
+    lifespan=preload_yolo_model
+)
+
+@app.get("/")
+async def read_root():
+    # Use the preloaded model for inference or other tasks
+    model = get_yolo_model()
+    return {"message": "Model loaded successfully!"}
+
+# Include routers here
+app.include_router(quality_assessment.router)

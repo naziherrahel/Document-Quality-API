@@ -2,9 +2,14 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.log
+*.ipynb
 .env
 .venv/
 .idea/
 .vscode/
 tests/
+docs/
+retraining/
+*.DS_Store
 data/
