@@ -1,0 +1,11 @@
+names:
+- passport
+- registration
+- children
+- inn
+- snils
+- migration
+nc: 6
+test: /content/dataset/dataset_yolo_v2/images/test
+train: /content/dataset/dataset_yolo_v2/images/train
+val: /content/dataset/dataset_yolo_v2/images/val
