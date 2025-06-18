@@ -16,7 +16,7 @@ services:
       restart_policy:
         condition: unless-stopped
     volumes:
-      - C:/Users/erraheln/Desktop/iqa/storage:/app/storage
+      - C:/Users/erraheln/Desktop/iqa/storage:/app/api/static
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all

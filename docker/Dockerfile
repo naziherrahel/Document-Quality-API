@@ -36,18 +36,35 @@ RUN python3.9 -m pip install --retries=$PIP_RETRIES \
     || python3.9 -m pip install --retries=$PIP_RETRIES \
     paddlepaddle-gpu==2.6.1 -i https://mirror.baidu.com/pypi/simple
 
-# Install PyTorch
+# Install PyTorch with compatible NumPy first
 RUN python3.9 -m pip install --retries=$PIP_RETRIES \
+    "numpy<2.0" && \
+    python3.9 -m pip install --retries=$PIP_RETRIES \
     torch==2.1.2+cu121 \
     torchvision==0.16.2+cu121 \
     --extra-index-url https://download.pytorch.org/whl/cu121
 
-# Install requirements with retries
+# Install requirements with retries and force numpy compatibility
 WORKDIR /app
-COPY requirements.txt .
-RUN python3.9 -m pip install --retries=$PIP_RETRIES -r requirements.txt
+COPY docker/requirements.txt .
+
+# Install requirements while preserving numpy version
+RUN python3.9 -m pip install --retries=$PIP_RETRIES \
+    "numpy<2.0" && \
+    python3.9 -m pip install --retries=$PIP_RETRIES \
+    --no-deps -r requirements.txt && \
+    python3.9 -m pip install --retries=$PIP_RETRIES \
+    -r requirements.txt
+
+# Explicitly install critical packages with proper verification
+RUN python3.9 -m pip install --no-cache-dir \
+    uvicorn==0.34.2 \
+    pdf2image==1.17.0 && \
+    python3.9 -c "import uvicorn; print(f'Uvicorn {uvicorn.__version__} installed')" && \
+    python3.9 -c "from pdf2image import __init__; print('pdf2image verified')" && \
+    python3.9 -c "import numpy, torch; print(f'NumPy {numpy.__version__} with Torch {torch.__version__}'); torch.tensor([1]).numpy()"
 
 COPY . .
 
 EXPOSE 8000
-CMD ["python3", "-m", "uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python3.9", "-m", "uvicorn", "api.app:app", "--host", "0.0.0.0", "--port", "8000"]
