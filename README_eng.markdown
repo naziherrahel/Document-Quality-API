@@ -1,7 +1,7 @@
-# Document Quality API - README
+# Document Vision API - README
 
 ## Overview
-The Document Quality API is a standalone FastAPI-based service designed to classify document types and assess text quality from uploaded images or PDFs. Leveraging YOLO for document detection and PaddleOCR for text extraction, the API is optimized for Russian-language documents and runs in a Docker container with NVIDIA GPU support. This version, updated as of June 18, 2025, focuses on simplicity and efficiency for integration with systems like 1C.
+The Document Vision API is a standalone FastAPI-based service designed to classify document types and assess text quality from uploaded images or PDFs. Leveraging YOLO for document detection and PaddleOCR for text extraction, the API is optimized for Russian-language documents and runs in a Docker container with NVIDIA GPU support. This version, updated as of June 18, 2025, focuses on simplicity and efficiency for integration with systems like 1C.
 
 ### Key Features
 - Classifies documents into types such as passports, INN, SNILS, etc.
@@ -11,7 +11,7 @@ The Document Quality API is a standalone FastAPI-based service designed to class
 - Handles multiple documents within a single image or PDF page.
 
 ### Supported Document Types
-- Passport (Russian Federation)
+- Passport 
 - INN
 - SNILS
 - Registration Certificate
@@ -189,5 +189,5 @@ If you clone this repo to test the API:
 
 ## Contact
 For support or inquiries, contact:
-- **Name**: Назих Эррахел (Nazih Errahel)
-- **Email**: [Insert email address]
+- **Name**: Nazih Errahel 
+- **Email**: naziherrahel@gmail.com - erraheln@ex.istu.edu
