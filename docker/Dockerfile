@@ -44,7 +44,7 @@ RUN python3.9 -m pip install --retries=$PIP_RETRIES \
 
 # Install requirements with retries
 WORKDIR /app
-COPY docker/requirements.txt .
+COPY requirements.txt .
 RUN python3.9 -m pip install --retries=$PIP_RETRIES -r requirements.txt
 
 COPY . .

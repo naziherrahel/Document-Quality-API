@@ -1,9 +1,12 @@
 services:
   doc_api:
-    image: fastapi-gpu:latest
+    image: fastapi-gpu:v1
     build:
-      context: ..  # Points to Document-Quality-API/
+      context: ..  
       dockerfile: docker/Dockerfile
+      tags:
+        - fastapi-gpu:v1
+        - fastapi-gpu:latest
       args:
         PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
         PIP_RETRIES: "5"
@@ -18,3 +21,4 @@ services:
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
+   
